@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>User Creation Form</title>
+    <!-- Styles  -->
+    <style>
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: #f8f8f8;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            appearance: none;
+            background-color: #f8f8f8;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+
+</head>
+
+
+<!-- Form Info -->
+
+<body>
+    <form class="form">
+        <label for="name">Full Name:</label><br>
+        <input type="text" id="name" name="name" required><br>
+        <br>
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br>
+        <br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br>
+        <br>
+        <label for="occupation">Occupation:</label><br>
+        <select id="occupation" name="occupation" required>
+            <option value="">--Please choose an option--</option>
+        </select>
+        <br>
+        <br>
+        <label for="state">State:</label><br>
+        <select id="state" name="state" required>
+            <option value="">--Please choose an option--</option>
+        </select>
+        <br>
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+
+    <div class="error-message"></div>
+    <div class="success-message"></div>
+
+    <!-- Javascript Stuff -->
+    <script>
+        // Get the form element
+        const form = document.querySelector('form');
+
+        // Get the occupation and state select elements
+        const occupationSelect = document.querySelector('#occupation');
+        const stateSelect = document.querySelector('#state');
+
+        // Make a GET request to the endpoint to retrieve the list of occupations and states
+        fetch('https://frontend-take-home.fetchrewards.com/form')
+            .then(response => response.json())
+            .then(data => {
+                // Populate the options for the occupation and state select elements
+                data.occupations.forEach(occupation => {
+                    const option = document.createElement('option');
+                    option.value = occupation;
+                    option.textContent = occupation;
+                    occupationSelect.appendChild(option);
+                });
+
+                data.states.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state.abbreviation;
+                    option.textContent = state.name;
+                    stateSelect.appendChild(option);
+                });
+            });
+
+        // Handle the form submission
+        form.addEventListener('submit', event => {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Collect the values of the form fields
+            const formData = new FormData(form);
+            const data = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                occupation: formData.get('occupation'),
+                state: formData.get('state')
+            };
+
+            form.reset(); // Reset the form
+
+            // Send a POST request to the endpoint with the form data
+            fetch('https://frontend-take-home.fetchrewards.com/form', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+
+            })
+                .then(response => {
+                    if (response.status === 201) {
+                        // Form submission was successful, provide feedback to the user
+                        alert('User created successfully');
+                    } else {
+                        // Form submission failed, provide feedback to the user
+                        alert('Failed to create user');
+                    }
+                })
+                .catch(error => {
+                    // Form submission failed, provide feedback to the user
+                    alert('Failed to create user');
+                });
+        });
+    </script>
+</body>
+
+</html>
